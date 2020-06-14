@@ -1,18 +1,18 @@
 # Matrix-calculator
 A program the following matrix calculations:
-  -Rank of a matrix
-  -Determinant of a Matrix
-  -Solving system Ax=0
-  -RREF
-  -Matrix Minor
-  -Adjoint matrix
-  -Transpose of a matrix
-  -Inverse of a matrix
+  - Rank of a matrix
+  - Determinant of a Matrix
+  - Solving system Ax=0
+  - RREF
+  - Matrix Minor
+  - Adjoint matrix
+  - Transpose of a matrix
+  - Inverse of a matrix
  
 All of these calculations are supported on the following matrix sizes:
-  -2x2
-  -3x3
-  -4x4
+  - 2x2
+  - 3x3
+  - 4x4
   
 Controls:
   - To change a number select a matrix square and input a signed int
