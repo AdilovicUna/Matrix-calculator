@@ -103,7 +103,7 @@ class MyForm : Form {
         Random rnd = new Random();
         for(int i = 0; i < m.size; i++){
             for (int j = 0; j < m.size; j++){
-                m[i,j] = rnd.Next(0,20);
+                m[i,j] = rnd.Next(-20,20);
             }
         }
         Invalidate();
