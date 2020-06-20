@@ -180,7 +180,7 @@ class MyForm : Form {
             if(editBox.Text.Length == 0){
                 m[editY, editX] = 0;
             }else{
-                m[editY, editX] = int.Parse(editBox.Text);
+                m[editY, editX] = double.Parse(editBox.Text);
             }
             Controls.Remove(editBox);
             editBox = null;
@@ -189,7 +189,7 @@ class MyForm : Form {
     }
     
     void openEdit() {
-        if(mOriginal == null && !other && !minor){
+        if(mOriginal == null && !determinant || rank || system && !minor){
             editBox = new TextBox();
             editBox.Font = font();
             Point ul = upperLeft();
@@ -209,7 +209,7 @@ class MyForm : Form {
         if (c == (char) Keys.Return)
             closeEdit();
         
-        if (c != (char) Keys.Back && c != '-' && !char.IsDigit(c))
+        if (c != (char) Keys.Back && c != '-' && c != '.' && !char.IsDigit(c))
             args.Handled = true;   // ignore keypresses that are not digits or '-'
     }
     
@@ -294,16 +294,16 @@ class MyForm : Form {
         return new Point(50,50);
     }
     PointF[] lPoints(){
-        PointF lp1 = new PointF(1200/2 - 30, 720/2 + 180 + 30);
-        PointF lp2 = new PointF(1200/2 - 30, 720/2 + 180 + 30 + 30);
-        PointF lp3 = new PointF(1200/2 - 30 - 30, 720/2 + 180 + 30 + 30 - 15);
+        PointF lp1 = new PointF(1200/2 - 40, 720/2 + 180 + 30);
+        PointF lp2 = new PointF(1200/2 - 40, 720/2 + 180 + 30 + 30);
+        PointF lp3 = new PointF(1200/2 - 40 - 30, 720/2 + 180 + 30 + 30 - 15);
         PointF[] lpoints = {lp1, lp2, lp3};
         return lpoints;
     }
     PointF[] rPoints(){
-        PointF rp1 = new PointF(1200/2 + 30, 720/2 + 180 + 30);
-        PointF rp2 = new PointF(1200/2 + 30, 720/2 + 180 + 30 + 30);
-        PointF rp3 = new PointF(1200/2 + 30 + 30, 720/2 + 180 + 30 + 30 - 15);
+        PointF rp1 = new PointF(1200/2 + 40, 720/2 + 180 + 30);
+        PointF rp2 = new PointF(1200/2 + 40, 720/2 + 180 + 30 + 30);
+        PointF rp3 = new PointF(1200/2 + 40 + 30, 720/2 + 180 + 30 + 30 - 15);
         PointF[] rpoints = {rp1, rp2, rp3};
         return rpoints;
     }
@@ -312,7 +312,7 @@ class MyForm : Form {
     Font fontOriginal() => new Font ("Times New Roman", originalOneSquareSize/4 + 2);    
     void createMatrixGrid(PaintEventArgs args, Graphics g){
         Point matrixCoordinates = upperLeft();
-        if (other){
+        if (determinant || rank || system){
             matrixCoordinates = secondUpperLeft();
         }
         int pixelNumber = matrixPixelNumber;
@@ -355,7 +355,7 @@ class MyForm : Form {
         format.LineAlignment = StringAlignment.Center;
         format.Alignment = StringAlignment.Center;
         Point ul = upperLeft();
-        if (other){
+        if (determinant || rank || system){
             ul = secondUpperLeft();
         }
         Point originalul = originalUpperLeft();
@@ -420,16 +420,17 @@ class MyForm : Form {
             //all of the computations will be of the other half, starting 100 pixels from the upper left corner of the right half 
             Point allUpperLeft = new Point(700,300);
             Font font = new Font("Georgia", oneSquareSize/4 + 2);
-            for(int i = 0; i < listOfOther.Count; i++){
+            for(int i = 0; i < listOfAll.Count; i++){
                 Rectangle rect = new Rectangle(allUpperLeft.X, allUpperLeft.Y + i*40, 400, oneSquareSize/2);
-                g.DrawString (listOfOther[i], font, Brushes.White, rect, format);
+                g.DrawString (listOfAll[i], font, Brushes.White, rect, format);
             }
-        }else if (other){
-            //since matrix is in the center of the left half of the screen, "other" will be in the center of the right half
+        }else if (determinant || rank || system){
+            //since matrix is in the center of the left half of the screen, calculation will be in the center of the right half
             Point otherUpperLeft = new Point(700,300);//360 is the center, but since height of the rect is 120, we start 60 pixels before
             Font font = new Font("Times New Roman", 30);
             Rectangle rect = new Rectangle(otherUpperLeft.X, otherUpperLeft.Y, 400, 120);
-            g.DrawString (listOfOther[0], font, Brushes.White, rect, format);
+            string show = rank ? rnk : determinant ? det : system ? sys : "";
+            g.DrawString (show, font, Brushes.White, rect, format);
         }
     }
 
@@ -443,10 +444,10 @@ class MyForm : Form {
         g.DrawPolygon(p, lpoints);
         //draw number of steps
         StringFormat format = new StringFormat();
-        format.LineAlignment = StringAlignment.Near;
-        format.Alignment = StringAlignment.Near;
+        format.LineAlignment = StringAlignment.Center;
+        format.Alignment = StringAlignment.Center;
         Font font = new Font("Times New Roman", 14);
-        Rectangle rect = new Rectangle(1200/2 - 15, 720/2 + 180 + 30, 40, 30);
+        Rectangle rect = new Rectangle(1200/2 - 25, 720/2 + 180 + 30, 55, 30);
         g.DrawString (step+1 + "/" + listOfStepsForRREF.Count, font, Brushes.GreenYellow, rect, format);
         //show numbers
         m = listOfStepsForRREF[step];
@@ -476,61 +477,83 @@ class MyForm : Form {
     #endregion
 
     #region Computations
-    bool RREF, inverse, transpose, adjoint, other, all;
-    List<string> listOfOther = new List<string>();
+    bool RREF, inverse, transpose, adjoint, determinant, rank, system, all;
+    string rnk,det,sys;
+    List<string> listOfAll = new List<string>();
     List<Matrix> listOfStepsForRREF;
     void System(object sender, EventArgs args){
         closeEdit();
-        other = true;
-        listOfOther.Add(m.System());
+        NumFalse();
+        MFalse();
+        system = true;
+        change();
+        mOriginal = null;
+        sys = m.System();
         Invalidate();
     }
     void Rank(object sender, EventArgs args){
         closeEdit();
-        other = true;
-        listOfOther.Add(m.Rank());
+        NumFalse();
+        MFalse();
+        rank = true;
+        change();
+        mOriginal = null;
+        rnk = m.Rank();
         Invalidate();
     }
     void Determinant(object sender, EventArgs args){
         closeEdit();
-        other = true;
-        listOfOther.Add(m.Determinant());
+        NumFalse();
+        MFalse();
+        determinant = true;
+        change();
+        mOriginal = null;
+        det = m.Determinant();
         Invalidate();
     }
     void Adjoint(object sender, EventArgs args){
         closeEdit();
+        NumFalse();
         adjoint = true;
-        mOriginal = m;
+        change();
         m = m.Adjoint();
         Invalidate();
     }
     void Transpose(object sender, EventArgs args){
         closeEdit();
+        NumFalse();
         transpose = true;
-        mOriginal = m.clone();
+        change();
         m = m.Transpose();
         Invalidate();
     }
     void ResultForRREF(object sender, EventArgs args){
         closeEdit();
+        NumFalse();
         RREF = true;
-        mOriginal = m.clone();
+        change();
         m = m.RREF(out List<Matrix> remember);
         Invalidate();
     }
     void SbsForRREF(object sender, EventArgs args){
         closeEdit();
+        NumFalse();
         RREF = true;
-        mOriginal = m.clone();
+        change();
         m.RREF(out listOfStepsForRREF);
         m = listOfStepsForRREF[0];
         Invalidate();
     }
     void Inverse(object sender, EventArgs args){
         closeEdit();
+        NumFalse();
+        if(mOriginal != null){
+            m = mOriginal.clone();
+        }
         Matrix temp = m.Inverse();
         if (temp.size == 1){
             MessageBox.Show("This matrix is not invertable");
+            mOriginal = null;
         }else{
             mOriginal = m;
             m = temp;
@@ -540,10 +563,12 @@ class MyForm : Form {
     }
     void All(object sender, EventArgs args){
         closeEdit();
-        listOfOther.Add(m.Determinant());
-        listOfOther.Add(m.Rank());
-        listOfOther.Add(m.System());
-        all = other = true;
+        MFalse();
+        change();
+        listOfAll.Add(m.Determinant());
+        listOfAll.Add(m.Rank());
+        listOfAll.Add(m.System());
+        all = true;
         Invalidate();
     }
     #endregion
@@ -569,14 +594,24 @@ class MyForm : Form {
 
     void Reset(int size){
         closeEdit();
-        other = transpose = adjoint = inverse = RREF = all = minor = false;
-        listOfOther.Clear();
+        NumFalse();
+        MFalse();
+        sys = rnk = det = null;
+        listOfAll.Clear();
         m = new Matrix(size);
         mOriginal = null;
         listOfStepsForRREF = null;
         step = 0;
         clickedForMinor = false;
         Invalidate();
+    }
+
+    void NumFalse(){
+        determinant = rank = system = all = minor = false;
+    }
+
+    void MFalse(){
+        transpose = adjoint = inverse = RREF = false;
     }
 
     bool insideTriangle(PointF[] pointFs, int x, int y){
@@ -591,6 +626,15 @@ class MyForm : Form {
     bool insideSquare(int i, int j, int eX, int eY){
         Point ul = upperLeft();
         return (ul.X + i*oneSquareSize) < eX && (ul.X + (i+1)*oneSquareSize) > eX && (ul.Y + j*oneSquareSize) < eY && (ul.Y + (j+1)*oneSquareSize) > eY;
+    }
+
+    void change(){
+        if(mOriginal == null && !rank && !determinant && !system){
+            mOriginal = m.clone();
+        }
+        else if(mOriginal != null){
+            m = mOriginal.clone();
+        }
     }
     #endregion
 }

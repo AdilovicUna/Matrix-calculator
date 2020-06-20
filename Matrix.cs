@@ -101,13 +101,23 @@ public bool changed(Matrix m){
                 remember.Add(new Matrix(this.size));
                 remember[remember.Count - 1] = this.clone();
             }
+            Matrix tempMatrix = this.clone();
             for (int l = 0; l < this.size; l++){
                 if (l != i){
                     for (int h = 0; h < this.size; h++){
-                        this[l,h] -= (this[l,leadingZero] * this[i,h]);
+                        double mul = tempMatrix[l,leadingZero] * tempMatrix[i,h];
+                        this[l,h] -= mul;
+                    }
+                    if(this.changed(remember[remember.Count-1])){
+                        remember.Add(new Matrix(this.size));
+                        remember[remember.Count - 1] = this.clone();
                     }
                 }
                 minusZero(this[i,l]);
+            }
+            if(this.changed(remember[remember.Count-1])){
+                remember.Add(new Matrix(this.size));
+                remember[remember.Count - 1] = this.clone();
             }
             leadingZero++;
         }
