@@ -23,43 +23,6 @@ class Matrix{
 
     public int size => matrixSize;
 
-
-#region Helper functions
-public int sign(int i, int j){
-    if ((i+j) % 2 == 0){
-        return 1;
-    }
-    return -1;
-}
-
-public void minusZero (double i){
-    if(i == -0){
-        i = 0;
-    }
-}
-
-public Matrix clone(){
-    Matrix clone = new Matrix(this.size);
-    for(int i = 0 ; i < this.size; i++){
-        for (int j = 0; j < this.size; j++){
-            clone[i,j] = this[i,j];
-        }
-    }
-    return clone;
-}
-
-public bool changed(Matrix m){
-    for(int i = 0 ; i < this.size; i++){
-        for (int j = 0; j < this.size; j++){
-           if(m[i,j] != this[i,j]){
-               return true;
-           }
-        }
-    }
-    return false;
-}
-#endregion
-
 #region RREF
     public Matrix RREF(out List<Matrix> remember){
         remember = new List<Matrix>(); 
@@ -250,17 +213,92 @@ public bool changed(Matrix m){
 #endregion
 
 #region Ax=0
+    public string[] var = {"s","k","d","t"}; 
     public string System(){
         Matrix matrix = this.clone();
         int rank = _Rank(matrix);
         string toReturn = "";
         if(rank == matrix.size){
-            toReturn += "x1=0";
+            toReturn += "x1 = 0";
             for(int i = 1; i < matrix.size; i++){
-                toReturn += ", x" + (i+1) + "=0";
+                toReturn += " ,  x" + (i+1) + " = 0";
             } 
+        }
+        else{
+            matrix = matrix.RREF(out List<Matrix> notUsed);
+            for(int i = 0; i < matrix.size; i++){
+                if(matrix[i,i] == 0 && i == 0){
+                    toReturn += "x" + (i+1) + " = " + var[i];
+                }
+                else if(matrix[i,i] == 0 && i != 0){
+                        toReturn += "  ,  x" + (i+1) + " = " + var[i];
+                }
+                else{
+                    if(i==0){
+                        toReturn += "x" + (i+1) + " = ";
+                    }
+                    else{
+                        toReturn += "  ,  x" + (i+1) + " = ";
+                    }
+                    bool check = true;
+                    for (int j = i; j < matrix.size; j++){ //skip the leading zeros and main diagonal
+                        if(i != j && matrix[i,j] != 0 && j != matrix.size - 1){
+                            double temp = matrix[i,j]*(-1);
+                            string temp2 = temp < 0 ? "(" + Math.Round(temp,2).ToString() + ")" : Math.Round(temp,2).ToString();
+                            toReturn += temp2 + var[j] + " + ";
+                            check = false;
+                        }
+                        else if (i != j && matrix[i,j] != 0 && j == matrix.size - 1){
+                            double temp = matrix[i,j]*(-1);
+                            string temp2 = temp < 0 ? "(" + Math.Round(temp,2).ToString() + ")" : Math.Round(temp,2).ToString();
+                            toReturn += temp2 + var[j];
+                            check = false;
+                        }
+                    }
+                    if (check){
+                        toReturn += 0;
+                    }
+                }
+            }
         }
         return toReturn;
     }
 #endregion
+
+#region Helper functions
+public int sign(int i, int j){
+    if ((i+j) % 2 == 0){
+        return 1;
+    }
+    return -1;
+}
+
+public void minusZero (double i){
+    if(i == -0){
+        i = 0;
+    }
+}
+
+public Matrix clone(){
+    Matrix clone = new Matrix(this.size);
+    for(int i = 0 ; i < this.size; i++){
+        for (int j = 0; j < this.size; j++){
+            clone[i,j] = this[i,j];
+        }
+    }
+    return clone;
+}
+
+public bool changed(Matrix m){
+    for(int i = 0 ; i < this.size; i++){
+        for (int j = 0; j < this.size; j++){
+           if(m[i,j] != this[i,j]){
+               return true;
+           }
+        }
+    }
+    return false;
+}
+#endregion
+
 }

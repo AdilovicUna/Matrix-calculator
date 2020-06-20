@@ -428,7 +428,7 @@ class MyForm : Form {
             //since matrix is in the center of the left half of the screen, calculation will be in the center of the right half
             Point otherUpperLeft = new Point(700,300);//360 is the center, but since height of the rect is 120, we start 60 pixels before
             Font font = new Font("Times New Roman", 30);
-            Rectangle rect = new Rectangle(otherUpperLeft.X, otherUpperLeft.Y, 400, 120);
+            Rectangle rect = new Rectangle(otherUpperLeft.X, otherUpperLeft.Y, 400, 200);
             string show = rank ? rnk : determinant ? det : system ? sys : "";
             g.DrawString (show, font, Brushes.White, rect, format);
         }
