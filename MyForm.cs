@@ -33,6 +33,13 @@ class MyForm : Form {
             new ToolStripMenuItem("Quit", null, Quit)
         }; 
 
+        ToolStripMenuItem[] menu2 = {
+            new ToolStripMenuItem("Ax=0", null, System),
+            new ToolStripMenuItem("Rank", null, Rank),
+            new ToolStripMenuItem("Determinant", null, Determinant),
+            new ToolStripMenuItem("All", null, All)
+        };
+
         ToolStripMenuItem[] RREF = {
             new ToolStripMenuItem("Result", null, ResultForRREF),
             new ToolStripMenuItem("Step by step", null, SbsForRREF),
@@ -45,18 +52,18 @@ class MyForm : Form {
             new ToolStripMenuItem("Inverse", null, Inverse)
         };
 
-        ToolStripMenuItem[] menu2 = {
-            new ToolStripMenuItem("Ax=0", null, System),
-            new ToolStripMenuItem("Rank", null, Rank),
-            new ToolStripMenuItem("Determinant", null, Determinant),
-            new ToolStripMenuItem("All", null, All)
+        ToolStripMenuItem[] menu4 = {
+            new ToolStripMenuItem("add Matrix", null, addM),
+            new ToolStripMenuItem("add Vector", null, addV),
+            new ToolStripMenuItem("add Scalar", null, addS)
         };
         
         ToolStripMenuItem[] topItems = {
             new ToolStripMenuItem("File", null, menu1),
             new ToolStripMenuItem("Numerical Computations", null, menu2),
             new ToolStripMenuItem("Matrix Computations", null, menu3),
-        }; 
+            new ToolStripMenuItem("+, -, *", null, menu4)
+        };
 
         MenuStrip menu = new MenuStrip();
         foreach (var item in topItems)
@@ -66,7 +73,7 @@ class MyForm : Form {
     }
     #endregion
 
-    #region Menu Functions
+    #region Menu1 Functions
     Matrix m = new Matrix(4);
     Matrix mOriginal; //this matrix will be used for RREF and Inverse to display the original
     void Quit(object sender, EventArgs args){
@@ -80,6 +87,120 @@ class MyForm : Form {
     }
     void MatrixSize4x4(object sender, EventArgs args){
        Reset(4);
+    }
+    #endregion
+    
+    #region Menu2 Functions
+    bool determinant, rank, system, all;
+    string rnk,det,sys;
+    List<string> listOfAll = new List<string>();
+    void System(object sender, EventArgs args){
+        closeEdit();
+        NumFalse();
+        MFalse();
+        system = true;
+        change();
+        mOriginal = null;
+        sys = m.System();
+        Invalidate();
+    }
+    void Rank(object sender, EventArgs args){
+        closeEdit();
+        NumFalse();
+        MFalse();
+        rank = true;
+        change();
+        mOriginal = null;
+        rnk = m.Rank();
+        Invalidate();
+    }
+    void Determinant(object sender, EventArgs args){
+        closeEdit();
+        NumFalse();
+        MFalse();
+        determinant = true;
+        change();
+        mOriginal = null;
+        det = m.Determinant();
+        Invalidate();
+    }
+
+     void All(object sender, EventArgs args){
+        closeEdit();
+        MFalse();
+        change();
+        listOfAll.Add(m.Determinant());
+        listOfAll.Add(m.Rank());
+        listOfAll.Add(m.System());
+        all = true;
+        Invalidate();
+    }
+    #endregion
+    
+    #region Menu3 Functions
+    bool RREF, inverse, transpose, adjoint;
+    List<Matrix> listOfStepsForRREF;
+    void Adjoint(object sender, EventArgs args){
+        closeEdit();
+        NumFalse();
+        adjoint = true;
+        change();
+        m = m.Adjoint();
+        Invalidate();
+    }
+    void Transpose(object sender, EventArgs args){
+        closeEdit();
+        NumFalse();
+        transpose = true;
+        change();
+        m = m.Transpose();
+        Invalidate();
+    }
+    void ResultForRREF(object sender, EventArgs args){
+        closeEdit();
+        NumFalse();
+        RREF = true;
+        change();
+        m = m.RREF(out List<Matrix> remember);
+        Invalidate();
+    }
+    void SbsForRREF(object sender, EventArgs args){
+        closeEdit();
+        NumFalse();
+        RREF = true;
+        change();
+        m.RREF(out listOfStepsForRREF);
+        m = listOfStepsForRREF[0];
+        Invalidate();
+    }
+    void Inverse(object sender, EventArgs args){
+        closeEdit();
+        NumFalse();
+        if(mOriginal != null){
+            m = mOriginal.clone();
+        }
+        Matrix temp = m.Inverse();
+        if (temp.size == 1){
+            MessageBox.Show("This matrix is not invertable");
+            mOriginal = null;
+        }else{
+            mOriginal = m;
+            m = temp;
+            inverse = true;
+        }
+        Invalidate();
+    }
+    #endregion
+    
+    #region Menu4 Functions
+    void addM(object sender, EventArgs args){
+
+    }
+    void addV(object sender, EventArgs args){
+
+    }
+    void addS(object sender, EventArgs args){
+
     }
     #endregion
     
@@ -473,103 +594,6 @@ class MyForm : Form {
             }
             clickedForMinor = false;
         }
-    }
-    #endregion
-
-    #region Computations
-    bool RREF, inverse, transpose, adjoint, determinant, rank, system, all;
-    string rnk,det,sys;
-    List<string> listOfAll = new List<string>();
-    List<Matrix> listOfStepsForRREF;
-    void System(object sender, EventArgs args){
-        closeEdit();
-        NumFalse();
-        MFalse();
-        system = true;
-        change();
-        mOriginal = null;
-        sys = m.System();
-        Invalidate();
-    }
-    void Rank(object sender, EventArgs args){
-        closeEdit();
-        NumFalse();
-        MFalse();
-        rank = true;
-        change();
-        mOriginal = null;
-        rnk = m.Rank();
-        Invalidate();
-    }
-    void Determinant(object sender, EventArgs args){
-        closeEdit();
-        NumFalse();
-        MFalse();
-        determinant = true;
-        change();
-        mOriginal = null;
-        det = m.Determinant();
-        Invalidate();
-    }
-    void Adjoint(object sender, EventArgs args){
-        closeEdit();
-        NumFalse();
-        adjoint = true;
-        change();
-        m = m.Adjoint();
-        Invalidate();
-    }
-    void Transpose(object sender, EventArgs args){
-        closeEdit();
-        NumFalse();
-        transpose = true;
-        change();
-        m = m.Transpose();
-        Invalidate();
-    }
-    void ResultForRREF(object sender, EventArgs args){
-        closeEdit();
-        NumFalse();
-        RREF = true;
-        change();
-        m = m.RREF(out List<Matrix> remember);
-        Invalidate();
-    }
-    void SbsForRREF(object sender, EventArgs args){
-        closeEdit();
-        NumFalse();
-        RREF = true;
-        change();
-        m.RREF(out listOfStepsForRREF);
-        m = listOfStepsForRREF[0];
-        Invalidate();
-    }
-    void Inverse(object sender, EventArgs args){
-        closeEdit();
-        NumFalse();
-        if(mOriginal != null){
-            m = mOriginal.clone();
-        }
-        Matrix temp = m.Inverse();
-        if (temp.size == 1){
-            MessageBox.Show("This matrix is not invertable");
-            mOriginal = null;
-        }else{
-            mOriginal = m;
-            m = temp;
-            inverse = true;
-        }
-        Invalidate();
-    }
-    void All(object sender, EventArgs args){
-        closeEdit();
-        MFalse();
-        change();
-        listOfAll.Add(m.Determinant());
-        listOfAll.Add(m.Rank());
-        listOfAll.Add(m.System());
-        all = true;
-        Invalidate();
     }
     #endregion
 
