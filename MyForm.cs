@@ -130,13 +130,14 @@ class MyForm : Form {
 
      void All(object sender, EventArgs args){
         closeEdit();
+        NumFalse();
         MFalse();
         AFalse();
+        all = true;
         change();
         listOfAll.Add(m.Determinant());
         listOfAll.Add(m.Rank());
         listOfAll.Add(m.System());
-        all = true;
         Invalidate();
     }
     #endregion
@@ -190,7 +191,7 @@ class MyForm : Form {
         }
         Matrix temp = m.Inverse();
         if (temp.size == 1){
-            MessageBox.Show("This matrix is not invertable");
+            MessageBox.Show("This matrix is not invertible");
             mOriginal = null;
         }else{
             mOriginal = m;
@@ -481,7 +482,7 @@ class MyForm : Form {
     Font fontOriginal() => new Font ("Times New Roman", originalOneSquareSize/4 + 2);    
     void createMatrixGrid(PaintEventArgs args, Graphics g){
         Point matrixCoordinates = upperLeft();
-        if (determinant || rank || system || anotherM || anotherV || anotherS){
+        if (determinant || rank || system || all || anotherM || anotherV || anotherS){
             matrixCoordinates = FirstHalfUpperLeft();
         }
         int pixelNumber = matrixPixelNumber;
@@ -532,7 +533,7 @@ class MyForm : Form {
         format.LineAlignment = StringAlignment.Center;
         format.Alignment = StringAlignment.Center;
         Point ul = upperLeft();
-        if (determinant || rank || system || anotherM || anotherV || anotherS){
+        if (determinant || rank || system || all || anotherM || anotherV || anotherS){
             ul = FirstHalfUpperLeft();
         }
         Point originalul = originalUpperLeft();
@@ -595,10 +596,10 @@ class MyForm : Form {
         if (all){
             //since matrix is in the center of the left half of the screen
             //all of the computations will be of the other half, starting 100 pixels from the upper left corner of the right half 
-            Point allUpperLeft = new Point(700,300);
+            Point allUpperLeft = new Point(650,300);
             Font font = new Font("Georgia", oneSquareSize/4 + 2);
             for(int i = 0; i < listOfAll.Count; i++){
-                Rectangle rect = new Rectangle(allUpperLeft.X, allUpperLeft.Y + i*40, 400, oneSquareSize/2);
+                Rectangle rect = new Rectangle(allUpperLeft.X, allUpperLeft.Y + i*40, 450, oneSquareSize);
                 g.DrawString (listOfAll[i], font, Brushes.White, rect, format);
             }
         }else if (determinant || rank || system){
@@ -721,7 +722,7 @@ class MyForm : Form {
     }
 
     void change(){
-        if(mOriginal == null && !rank && !determinant && !system){
+        if(mOriginal == null && !rank && !determinant && !system && !all){
             mOriginal = m.clone();
         }
         else if(mOriginal != null){
