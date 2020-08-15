@@ -89,7 +89,7 @@ class MyForm : Form {
        Reset(4);
     }
     #endregion
-    
+
     #region Menu2 Functions
     bool determinant, rank, system, all;
     string rnk,det,sys;
@@ -98,6 +98,7 @@ class MyForm : Form {
         closeEdit();
         NumFalse();
         MFalse();
+        AFalse();
         system = true;
         change();
         mOriginal = null;
@@ -108,6 +109,7 @@ class MyForm : Form {
         closeEdit();
         NumFalse();
         MFalse();
+        AFalse();
         rank = true;
         change();
         mOriginal = null;
@@ -118,6 +120,7 @@ class MyForm : Form {
         closeEdit();
         NumFalse();
         MFalse();
+        AFalse();
         determinant = true;
         change();
         mOriginal = null;
@@ -128,6 +131,7 @@ class MyForm : Form {
      void All(object sender, EventArgs args){
         closeEdit();
         MFalse();
+        AFalse();
         change();
         listOfAll.Add(m.Determinant());
         listOfAll.Add(m.Rank());
@@ -143,6 +147,7 @@ class MyForm : Form {
     void Adjoint(object sender, EventArgs args){
         closeEdit();
         NumFalse();
+        AFalse();
         adjoint = true;
         change();
         m = m.Adjoint();
@@ -151,6 +156,7 @@ class MyForm : Form {
     void Transpose(object sender, EventArgs args){
         closeEdit();
         NumFalse();
+        AFalse();
         transpose = true;
         change();
         m = m.Transpose();
@@ -159,6 +165,7 @@ class MyForm : Form {
     void ResultForRREF(object sender, EventArgs args){
         closeEdit();
         NumFalse();
+        AFalse();
         RREF = true;
         change();
         m = m.RREF(out List<Matrix> remember);
@@ -167,6 +174,7 @@ class MyForm : Form {
     void SbsForRREF(object sender, EventArgs args){
         closeEdit();
         NumFalse();
+        AFalse();
         RREF = true;
         change();
         m.RREF(out listOfStepsForRREF);
@@ -176,6 +184,7 @@ class MyForm : Form {
     void Inverse(object sender, EventArgs args){
         closeEdit();
         NumFalse();
+        AFalse();
         if(mOriginal != null){
             m = mOriginal.clone();
         }
@@ -193,14 +202,30 @@ class MyForm : Form {
     #endregion
     
     #region Menu4 Functions
+    bool anotherM, anotherV, anotherS;
     void addM(object sender, EventArgs args){
-
+        closeEdit();
+        NumFalse();
+        MFalse();
+        AFalse();
+        anotherM = true;
+        Invalidate();
     }
     void addV(object sender, EventArgs args){
-
+        closeEdit();
+        NumFalse();
+        MFalse();
+        AFalse();
+        anotherV = true;
+        Invalidate();
     }
     void addS(object sender, EventArgs args){
-
+        closeEdit();
+        NumFalse();
+        MFalse();
+        AFalse();
+        anotherS = true;
+        Invalidate();
     }
     #endregion
     
@@ -268,12 +293,14 @@ class MyForm : Form {
     }
 
     public void OnMinorClick(object sender, EventArgs args){
-        minor = !minor;
-        if(!minor){
-            minor = false;
-            clickedForMinor = false;
+        if(!anotherM && !anotherV && !anotherS){
+            minor = !minor;
+            if(!minor){
+                minor = false;
+                clickedForMinor = false;
+            }
+            Invalidate();
         }
-        Invalidate();
     }
     #endregion
 
@@ -293,6 +320,9 @@ class MyForm : Form {
         displayOther(args, g);
         if(minor){
             drawMinor(args, g);
+        }
+        if(anotherM || anotherV || anotherS){
+            createAnother(args, g);
         }
     }
     
@@ -406,9 +436,27 @@ class MyForm : Form {
         Point screenCenter = new Point(1200/2, 720/2);
         return new Point(screenCenter.X - matrixPixelNumber/2,  screenCenter.Y - matrixPixelNumber/2);
     }
-    Point secondUpperLeft(){
-        Point screenQuater = new Point(1200/4, 720/2);
+    Point FirstscreenQuater(){
+        return new Point(1200/4, 720/2);
+    }
+    Point FirstHalfUpperLeft(){
+        Point screenQuater = FirstscreenQuater();
         return new Point(screenQuater.X - matrixPixelNumber/2,  screenQuater.Y - matrixPixelNumber/2);
+    }
+    Point SecondscreenQuater(){
+        return new Point(1200/2 + 1200/4, 720/2);
+    }
+    Point SecondHalfUpperLeft(){
+        Point screenQuater = SecondscreenQuater();
+        return new Point(screenQuater.X - matrixPixelNumber/2,  screenQuater.Y - matrixPixelNumber/2);
+    }
+    Point ScalarUpperLeft(){
+        Point screenQuater = SecondscreenQuater();
+        return new Point(screenQuater.X - oneSquareSize/2, screenQuater.Y - oneSquareSize/2);
+    }
+    Point VectorUpperLeft(){
+        Point screenQuater = SecondscreenQuater();
+        return new Point(screenQuater.X - oneSquareSize/2, screenQuater.Y - matrixPixelNumber/2);
     }
     Point originalUpperLeft(){
         //matrix original will be in the upper left corner of the window, these will be the coordinates for the upper left corner:
@@ -433,8 +481,8 @@ class MyForm : Form {
     Font fontOriginal() => new Font ("Times New Roman", originalOneSquareSize/4 + 2);    
     void createMatrixGrid(PaintEventArgs args, Graphics g){
         Point matrixCoordinates = upperLeft();
-        if (determinant || rank || system){
-            matrixCoordinates = secondUpperLeft();
+        if (determinant || rank || system || anotherM || anotherV || anotherS){
+            matrixCoordinates = FirstHalfUpperLeft();
         }
         int pixelNumber = matrixPixelNumber;
         int oneSquare = oneSquareSize;
@@ -442,28 +490,36 @@ class MyForm : Form {
         if(clickedForMinor){
             pen = new Pen (Brushes.DarkSalmon, 3);
         }
-        _createMatrixGrid(args, g, matrixCoordinates, pixelNumber, oneSquare, pen);
+        _createMatrixGrid(args, g, matrixCoordinates, pixelNumber, oneSquare, pen, true);
         if (mOriginal != null){
             Point originalMatrixCoordinates = originalUpperLeft();
             int originalPixelNumber = matrixOriginalPixelNumber;
             int originalOneSquare = originalOneSquareSize;
             Pen originalPen = new Pen (Brushes.Orange, 1);
 
-            _createMatrixGrid(args, g, originalMatrixCoordinates, originalPixelNumber, originalOneSquare, originalPen);
+            _createMatrixGrid(args, g, originalMatrixCoordinates, originalPixelNumber, originalOneSquare, originalPen, true);
         }
     }
 
-    void _createMatrixGrid(PaintEventArgs args, Graphics g, Point matrixCoordinates, int pixelNumber, int oneSquare, Pen pen){
+    void _createMatrixGrid(PaintEventArgs args, Graphics g, Point matrixCoordinates, int pixelNumber, int oneSquare, Pen pen, bool isSquare){
         //first we make the outline of the matrix
         Rectangle rect = new Rectangle (matrixCoordinates.X, matrixCoordinates.Y, pixelNumber, pixelNumber);
+        if (!isSquare){
+            rect = new Rectangle (matrixCoordinates.X, matrixCoordinates.Y, oneSquareSize, pixelNumber);
+        }
         g.DrawRectangle(pen, rect);
         //now we draw lines of the grid with given oneSquareSize
         for (int i = 0; i <= pixelNumber; i += oneSquare){
-            Point fromVertical = new Point (matrixCoordinates.X + i, matrixCoordinates.Y);
-            Point toVertical = new Point (matrixCoordinates.X + i, matrixCoordinates.Y + pixelNumber);
-            g.DrawLine(pen, fromVertical, toVertical);
+            if(isSquare){
+                Point fromVertical = new Point (matrixCoordinates.X + i, matrixCoordinates.Y);
+                Point toVertical = new Point (matrixCoordinates.X + i, matrixCoordinates.Y + pixelNumber);
+                g.DrawLine(pen, fromVertical, toVertical);
+            }
             Point fromHorizontal = new Point (matrixCoordinates.X, matrixCoordinates.Y + i);
             Point toHorizontal = new Point (matrixCoordinates.X + pixelNumber, matrixCoordinates.Y + i);
+            if(!isSquare){
+                toHorizontal = new Point(matrixCoordinates.X + oneSquareSize, matrixCoordinates.Y + i);
+            }
             g.DrawLine(pen, fromHorizontal, toHorizontal);
         }
 
@@ -476,8 +532,8 @@ class MyForm : Form {
         format.LineAlignment = StringAlignment.Center;
         format.Alignment = StringAlignment.Center;
         Point ul = upperLeft();
-        if (determinant || rank || system){
-            ul = secondUpperLeft();
+        if (determinant || rank || system || anotherM || anotherV || anotherS){
+            ul = FirstHalfUpperLeft();
         }
         Point originalul = originalUpperLeft();
         displayText(args, g, ul, originalul, format);
@@ -595,6 +651,15 @@ class MyForm : Form {
             clickedForMinor = false;
         }
     }
+    
+    void createAnother(PaintEventArgs args, Graphics g){
+        Point matrixCoordinates = anotherM ? SecondHalfUpperLeft() : anotherV ? VectorUpperLeft() : ScalarUpperLeft();
+        int pixelNumber = anotherS ? oneSquareSize : matrixPixelNumber;
+        int oneSquare = oneSquareSize;
+        Pen pen = new Pen (Brushes.GreenYellow, 1);
+        bool square = anotherV ? false : true;
+        _createMatrixGrid(args, g, matrixCoordinates, pixelNumber, oneSquare, pen,square);
+    }
     #endregion
 
     #region Helper functions
@@ -638,6 +703,9 @@ class MyForm : Form {
         transpose = adjoint = inverse = RREF = false;
     }
 
+    void AFalse(){
+        anotherM = anotherV = anotherS = false;
+    }
     bool insideTriangle(PointF[] pointFs, int x, int y){
         //formula I am using: A = [ x1(y2 – y3) + x2(y3 – y1) + x3(y1-y2)]/2
         double area = Math.Abs((pointFs[0].X * (pointFs[1].Y - pointFs[2].Y) + pointFs[1].X * (pointFs[2].Y - pointFs[0].Y) + pointFs[2].X * (pointFs[0].Y - pointFs[1].Y))/2);
