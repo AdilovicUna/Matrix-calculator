@@ -345,6 +345,9 @@ class MyForm : Form {
             editBox = new TextBox();
             editBox.Font = font();
             Point ul = upperLeft();
+            if(anotherM || anotherV || anotherS){
+                ul = FirstHalfUpperLeft();
+            }
             editBox.SetBounds(ul.X + oneSquareSize * editX, ul.Y + oneSquareSize * editY,
                             oneSquareSize, oneSquareSize);
             editBox.Text = m[editY, editX].ToString();
@@ -383,15 +386,11 @@ class MyForm : Form {
 
     protected override void OnMouseDown(MouseEventArgs e){
         closeEdit();    // close existing box if any
-        Point ul = upperLeft();
-        if (e.X < ul.X || e.Y < ul.Y)
-            return;
-        
-        int x = (e.X - ul.X) / oneSquareSize;
-        int y = (e.Y - ul.Y) / oneSquareSize;
-        if (x < m.size && y < m.size) {
-            editX = x; editY = y;
-            openEdit();
+        CheckIfClicked(e, upperLeft());
+        if(anotherM || anotherS || anotherV){
+            CheckIfClicked(e, FirstHalfUpperLeft());
+            Point temp = anotherM ? SecondHalfUpperLeft() : anotherV ? VectorUpperLeft() : ScalarUpperLeft();
+            CheckIfClicked(e, temp);
         }
         if(insideTriangle(rPoints(), e.X, e.Y)){
             if(step+1 == listOfStepsForRREF.Count){
@@ -420,6 +419,18 @@ class MyForm : Form {
                     }
                 }
             }
+        }
+    }
+
+    void CheckIfClicked(MouseEventArgs e, Point ul){
+        if (e.X < ul.X || e.Y < ul.Y)
+            return;
+        
+        int x = (e.X - ul.X) / oneSquareSize;
+        int y = (e.Y - ul.Y) / oneSquareSize;
+        if (x < m.size && y < m.size) {
+            editX = x; editY = y;
+            openEdit();
         }
     }
 
@@ -453,11 +464,11 @@ class MyForm : Form {
     }
     Point ScalarUpperLeft(){
         Point screenQuater = SecondscreenQuater();
-        return new Point(screenQuater.X - oneSquareSize/2, screenQuater.Y - oneSquareSize/2);
+        return new Point(screenQuater.X - oneSquareSize/2 - 100, screenQuater.Y - oneSquareSize/2);
     }
     Point VectorUpperLeft(){
         Point screenQuater = SecondscreenQuater();
-        return new Point(screenQuater.X - oneSquareSize/2, screenQuater.Y - matrixPixelNumber/2);
+        return new Point(screenQuater.X - oneSquareSize/2 - 100, screenQuater.Y - matrixPixelNumber/2);
     }
     Point originalUpperLeft(){
         //matrix original will be in the upper left corner of the window, these will be the coordinates for the upper left corner:
@@ -660,9 +671,15 @@ class MyForm : Form {
         Pen pen = new Pen (Brushes.GreenYellow, 1);
         bool square = anotherV ? false : true;
         _createMatrixGrid(args, g, matrixCoordinates, pixelNumber, oneSquare, pen,square);
+        Point from = new Point(1200/2 - 40, 720/2 + oneSquareSize/2);
+        Point to = new Point(1200/2 + 40, 720/2 + oneSquareSize/2);
+        g.DrawLine(pen, from, to);
     }
     #endregion
-
+//click to change sign - default
+//deafault 0 in everything
+//make clickable
+//fix the bug when clicking
     #region Helper functions
     void moveLR(int i){
         closeEdit();
