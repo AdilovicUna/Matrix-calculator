@@ -51,18 +51,11 @@ class MyForm : Form {
             new ToolStripMenuItem("RREF", null, RREF),
             new ToolStripMenuItem("Inverse", null, Inverse)
         };
-
-        ToolStripMenuItem[] menu4 = {
-            new ToolStripMenuItem("add Matrix", null, addM),
-            new ToolStripMenuItem("add Vector", null, addV),
-            new ToolStripMenuItem("add Scalar", null, addS)
-        };
         
         ToolStripMenuItem[] topItems = {
             new ToolStripMenuItem("File", null, menu1),
             new ToolStripMenuItem("Numerical Computations", null, menu2),
             new ToolStripMenuItem("Matrix Computations", null, menu3),
-            new ToolStripMenuItem("+, -, *", null, menu4)
         };
 
         MenuStrip menu = new MenuStrip();
@@ -98,7 +91,6 @@ class MyForm : Form {
         closeEdit();
         NumFalse();
         MFalse();
-        AFalse();
         system = true;
         change();
         mOriginal = null;
@@ -109,7 +101,6 @@ class MyForm : Form {
         closeEdit();
         NumFalse();
         MFalse();
-        AFalse();
         rank = true;
         change();
         mOriginal = null;
@@ -120,7 +111,6 @@ class MyForm : Form {
         closeEdit();
         NumFalse();
         MFalse();
-        AFalse();
         determinant = true;
         change();
         mOriginal = null;
@@ -132,7 +122,6 @@ class MyForm : Form {
         closeEdit();
         NumFalse();
         MFalse();
-        AFalse();
         all = true;
         change();
         listOfAll.Add(m.Determinant());
@@ -148,7 +137,6 @@ class MyForm : Form {
     void Adjoint(object sender, EventArgs args){
         closeEdit();
         NumFalse();
-        AFalse();
         adjoint = true;
         change();
         m = m.Adjoint();
@@ -157,7 +145,6 @@ class MyForm : Form {
     void Transpose(object sender, EventArgs args){
         closeEdit();
         NumFalse();
-        AFalse();
         transpose = true;
         change();
         m = m.Transpose();
@@ -166,7 +153,6 @@ class MyForm : Form {
     void ResultForRREF(object sender, EventArgs args){
         closeEdit();
         NumFalse();
-        AFalse();
         RREF = true;
         change();
         m = m.RREF(out List<Matrix> remember);
@@ -175,7 +161,6 @@ class MyForm : Form {
     void SbsForRREF(object sender, EventArgs args){
         closeEdit();
         NumFalse();
-        AFalse();
         RREF = true;
         change();
         m.RREF(out listOfStepsForRREF);
@@ -185,7 +170,6 @@ class MyForm : Form {
     void Inverse(object sender, EventArgs args){
         closeEdit();
         NumFalse();
-        AFalse();
         if(mOriginal != null){
             m = mOriginal.clone();
         }
@@ -201,35 +185,7 @@ class MyForm : Form {
         Invalidate();
     }
     #endregion
-    
-    #region Menu4 Functions
-    bool anotherM, anotherV, anotherS;
-    void addM(object sender, EventArgs args){
-        closeEdit();
-        NumFalse();
-        MFalse();
-        AFalse();
-        anotherM = true;
-        Invalidate();
-    }
-    void addV(object sender, EventArgs args){
-        closeEdit();
-        NumFalse();
-        MFalse();
-        AFalse();
-        anotherV = true;
-        Invalidate();
-    }
-    void addS(object sender, EventArgs args){
-        closeEdit();
-        NumFalse();
-        MFalse();
-        AFalse();
-        anotherS = true;
-        Invalidate();
-    }
-    #endregion
-    
+
     #region  Buttons
     bool minor = false;
     public Button CreateDynamicButton(string buttonName, int x, int y, int height, int width, Color forecolor, Color backcolor)  {  
@@ -294,14 +250,12 @@ class MyForm : Form {
     }
 
     public void OnMinorClick(object sender, EventArgs args){
-        if(!anotherM && !anotherV && !anotherS){
-            minor = !minor;
-            if(!minor){
-                minor = false;
-                clickedForMinor = false;
-            }
-            Invalidate();
+        minor = !minor;
+        if(!minor){
+            minor = false;
+            clickedForMinor = false;
         }
+        Invalidate();
     }
     #endregion
 
@@ -322,9 +276,6 @@ class MyForm : Form {
         if(minor){
             drawMinor(args, g);
         }
-        if(anotherM || anotherV || anotherS){
-            createAnother(args, g);
-        }
     }
     
     void closeEdit() {
@@ -341,13 +292,10 @@ class MyForm : Form {
     }
     
     void openEdit() {
-        if(mOriginal == null && !determinant || rank || system && !minor){
+        if(mOriginal == null && !determinant && !rank && !system && !minor){
             editBox = new TextBox();
             editBox.Font = font();
             Point ul = upperLeft();
-            if(anotherM || anotherV || anotherS){
-                ul = FirstHalfUpperLeft();
-            }
             editBox.SetBounds(ul.X + oneSquareSize * editX, ul.Y + oneSquareSize * editY,
                             oneSquareSize, oneSquareSize);
             editBox.Text = m[editY, editX].ToString();
@@ -387,11 +335,6 @@ class MyForm : Form {
     protected override void OnMouseDown(MouseEventArgs e){
         closeEdit();    // close existing box if any
         CheckIfClicked(e, upperLeft());
-        if(anotherM || anotherS || anotherV){
-            CheckIfClicked(e, FirstHalfUpperLeft());
-            Point temp = anotherM ? SecondHalfUpperLeft() : anotherV ? VectorUpperLeft() : ScalarUpperLeft();
-            CheckIfClicked(e, temp);
-        }
         if(insideTriangle(rPoints(), e.X, e.Y)){
             if(step+1 == listOfStepsForRREF.Count){
                 step = listOfStepsForRREF.Count-1;
@@ -462,14 +405,6 @@ class MyForm : Form {
         Point screenQuater = SecondscreenQuater();
         return new Point(screenQuater.X - matrixPixelNumber/2,  screenQuater.Y - matrixPixelNumber/2);
     }
-    Point ScalarUpperLeft(){
-        Point screenQuater = SecondscreenQuater();
-        return new Point(screenQuater.X - oneSquareSize/2 - 100, screenQuater.Y - oneSquareSize/2);
-    }
-    Point VectorUpperLeft(){
-        Point screenQuater = SecondscreenQuater();
-        return new Point(screenQuater.X - oneSquareSize/2 - 100, screenQuater.Y - matrixPixelNumber/2);
-    }
     Point originalUpperLeft(){
         //matrix original will be in the upper left corner of the window, these will be the coordinates for the upper left corner:
         return new Point(50,50);
@@ -493,7 +428,7 @@ class MyForm : Form {
     Font fontOriginal() => new Font ("Times New Roman", originalOneSquareSize/4 + 2);    
     void createMatrixGrid(PaintEventArgs args, Graphics g){
         Point matrixCoordinates = upperLeft();
-        if (determinant || rank || system || all || anotherM || anotherV || anotherS){
+        if(determinant || rank || system || all){
             matrixCoordinates = FirstHalfUpperLeft();
         }
         int pixelNumber = matrixPixelNumber;
@@ -502,36 +437,28 @@ class MyForm : Form {
         if(clickedForMinor){
             pen = new Pen (Brushes.DarkSalmon, 3);
         }
-        _createMatrixGrid(args, g, matrixCoordinates, pixelNumber, oneSquare, pen, true);
+        _createMatrixGrid(args, g, matrixCoordinates, pixelNumber, oneSquare, pen);
         if (mOriginal != null){
             Point originalMatrixCoordinates = originalUpperLeft();
             int originalPixelNumber = matrixOriginalPixelNumber;
             int originalOneSquare = originalOneSquareSize;
             Pen originalPen = new Pen (Brushes.Orange, 1);
 
-            _createMatrixGrid(args, g, originalMatrixCoordinates, originalPixelNumber, originalOneSquare, originalPen, true);
+            _createMatrixGrid(args, g, originalMatrixCoordinates, originalPixelNumber, originalOneSquare, originalPen);
         }
     }
 
-    void _createMatrixGrid(PaintEventArgs args, Graphics g, Point matrixCoordinates, int pixelNumber, int oneSquare, Pen pen, bool isSquare){
+    void _createMatrixGrid(PaintEventArgs args, Graphics g, Point matrixCoordinates, int pixelNumber, int oneSquare, Pen pen){
         //first we make the outline of the matrix
         Rectangle rect = new Rectangle (matrixCoordinates.X, matrixCoordinates.Y, pixelNumber, pixelNumber);
-        if (!isSquare){
-            rect = new Rectangle (matrixCoordinates.X, matrixCoordinates.Y, oneSquareSize, pixelNumber);
-        }
         g.DrawRectangle(pen, rect);
         //now we draw lines of the grid with given oneSquareSize
         for (int i = 0; i <= pixelNumber; i += oneSquare){
-            if(isSquare){
                 Point fromVertical = new Point (matrixCoordinates.X + i, matrixCoordinates.Y);
                 Point toVertical = new Point (matrixCoordinates.X + i, matrixCoordinates.Y + pixelNumber);
                 g.DrawLine(pen, fromVertical, toVertical);
-            }
             Point fromHorizontal = new Point (matrixCoordinates.X, matrixCoordinates.Y + i);
             Point toHorizontal = new Point (matrixCoordinates.X + pixelNumber, matrixCoordinates.Y + i);
-            if(!isSquare){
-                toHorizontal = new Point(matrixCoordinates.X + oneSquareSize, matrixCoordinates.Y + i);
-            }
             g.DrawLine(pen, fromHorizontal, toHorizontal);
         }
 
@@ -544,7 +471,7 @@ class MyForm : Form {
         format.LineAlignment = StringAlignment.Center;
         format.Alignment = StringAlignment.Center;
         Point ul = upperLeft();
-        if (determinant || rank || system || all || anotherM || anotherV || anotherS){
+        if(determinant || rank || system || all){
             ul = FirstHalfUpperLeft();
         }
         Point originalul = originalUpperLeft();
@@ -663,23 +590,8 @@ class MyForm : Form {
             clickedForMinor = false;
         }
     }
-    
-    void createAnother(PaintEventArgs args, Graphics g){
-        Point matrixCoordinates = anotherM ? SecondHalfUpperLeft() : anotherV ? VectorUpperLeft() : ScalarUpperLeft();
-        int pixelNumber = anotherS ? oneSquareSize : matrixPixelNumber;
-        int oneSquare = oneSquareSize;
-        Pen pen = new Pen (Brushes.GreenYellow, 1);
-        bool square = anotherV ? false : true;
-        _createMatrixGrid(args, g, matrixCoordinates, pixelNumber, oneSquare, pen,square);
-        Point from = new Point(1200/2 - 40, 720/2 + oneSquareSize/2);
-        Point to = new Point(1200/2 + 40, 720/2 + oneSquareSize/2);
-        g.DrawLine(pen, from, to);
-    }
     #endregion
-//click to change sign - default
-//deafault 0 in everything
-//make clickable
-//fix the bug when clicking
+    
     #region Helper functions
     void moveLR(int i){
         closeEdit();
@@ -721,9 +633,6 @@ class MyForm : Form {
         transpose = adjoint = inverse = RREF = false;
     }
 
-    void AFalse(){
-        anotherM = anotherV = anotherS = false;
-    }
     bool insideTriangle(PointF[] pointFs, int x, int y){
         //formula I am using: A = [ x1(y2 – y3) + x2(y3 – y1) + x3(y1-y2)]/2
         double area = Math.Abs((pointFs[0].X * (pointFs[1].Y - pointFs[2].Y) + pointFs[1].X * (pointFs[2].Y - pointFs[0].Y) + pointFs[2].X * (pointFs[0].Y - pointFs[1].Y))/2);
