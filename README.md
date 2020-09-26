@@ -1,5 +1,5 @@
 # Matrix-calculator
-A program the following matrix calculations:
+A program that makes the following matrix calculations:
   - Rank of a matrix
   - Determinant of a Matrix
   - Solving system Ax=0
